@@ -1,78 +1,67 @@
-# WRO 2026 Future Engineers — RoboTronics
+# Power and Sensor Architecture
 
-## Team RoboTronics — Basurto, Bilbao, Spain
+## Power System
 
-We are three siblings from Bilbao competing in 
-WRO 2026 Future Engineers for the first time, 
-after several years in WRO RoboMission.
-
-| Member | Age | Role |
-|--------|-----|------|
-| Sandra García Arias | 20 | Programming and Strategy |
-| Oscar García Arias | 16 | Mechanics and Programming |
-| Asier García Arias | 16 | Programming and Testing |
-| Coach: Edu | — | Guidance and Support |
-
----
-
-## Our WRO History
-
-| Year | Category | Result |
-|------|----------|--------|
-| 2023 | RoboMission Junior | 1st place Euskadi, Top 15 National |
-| 2024 | RoboMission Senior | 2nd place Euskadi |
-| 2026 | Future Engineers | First year |
-
----
-
-## The Robot
-
-Built with LEGO Spike Prime. The robot drives 
-autonomously on a 3x3 meter track, completing 
-3 laps and stopping in the finish section.
-
-**Platform**: LEGO Spike Prime
-**Challenge**: Open Challenge (3 laps autonomous)
-**Sensors**: Color sensor + 3 distance sensors
-**Motors**: 1 traction + 1 steering (Ackermann)
-
----
-
-## Documentation
-
-| Section | Content |
-|---------|---------|
-| [Mobility and Mechanical Design](src/README.md) | Chassis, steering, drive system |
-| [Power and Sensor Architecture](schemes/README.md) | Sensors, connections, power |
-| [Software and Strategy](src/README.md) | Code explanation, flow diagram |
-| [Vehicle Photos](v-photos/README.md) | Robot from all angles |
-| [Team Photos](t-photos/README.md) | Team information |
-| [Performance Videos](video/README.md) | YouTube demonstrations |
-
----
-
-## Quick Start
-
-1. Connect Spike hub via USB
-2. Upload src/main.py to Slot 1
-3. Press center button to turn on
-4. Press left button to start
-5. Robot completes 3 laps automatically
+The robot runs entirely on the LEGO Spike Prime 
+rechargeable battery (7.2V Li-Ion). No external 
+power source is needed. The Spike hub distributes 
+power to all motors and sensors through its ports.
 
 ---
 
 ## Port Configuration
 
-| Port | Component | Function |
-|------|-----------|----------|
-| A | Motor | Steering (front wheels) |
-| B | Motor | Traction (rear wheels) |
-| C | Color sensor | Detects lines on floor |
-| D | Distance sensor | Front wall detection |
-| E | Distance sensor | Left wall distance |
-| F | Distance sensor | Right wall distance |
+| Port | Component | Direction | Purpose |
+|------|-----------|-----------|---------|
+| A | Large motor | — | Steering front wheels left/right |
+| B | Large motor | — | Driving rear wheels forward/backward |
+| C | Color sensor | Facing DOWN | Detects orange/blue floor lines |
+| D | Distance sensor | Facing FORWARD | Detects front wall for corner turns |
+| E | Distance sensor | Facing LEFT | Measures left wall distance |
+| F | Distance sensor | Facing RIGHT | Measures right wall distance |
 
 ---
 
-*Team RoboTronics — Basurto, Bilbao, Basque Country, Spain*
-*WRO 2026 Future Engineers*
+## Sensor Placement Decisions
+
+**Color Sensor — Port C — Facing down**
+Mounted at the front of the robot pointing toward 
+the floor. Placed at the front (not underneath) 
+so it detects lines earlier, giving the robot 
+more time to react before the corner.
+
+**Front Distance Sensor — Port D — Facing forward**
+Mounted at the front center. Acts as backup 
+corner detection when the color sensor misses 
+a line. Triggers a turn when wall is closer 
+than 25cm.
+
+**Left Distance Sensor — Port E — Facing left**
+Mounted on the left side. Measures distance to 
+the left wall continuously. Used together with 
+the right sensor to keep the robot centered.
+
+**Right Distance Sensor — Port F — Facing right**
+Mounted on the right side. Measures distance to 
+the right wall continuously. Used together with 
+the left sensor to keep the robot centered.
+
+---
+
+## Why Three Distance Sensors
+
+The Open Challenge randomizes inner wall positions 
+each round. Track width varies between 600mm and 
+1000mm. Using two side sensors allows the robot 
+to adapt to any configuration automatically by 
+measuring both walls and adjusting steering to 
+maintain equal distances on both sides.
+
+The front sensor adds a safety layer for corner 
+detection independent of floor color detection.
+
+---
+
+## Connection Photo
+
+[Photo to be added]
