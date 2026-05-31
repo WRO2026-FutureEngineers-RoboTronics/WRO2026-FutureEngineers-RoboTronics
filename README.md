@@ -1,16 +1,14 @@
-## Hi there 👋
+# WRO 2026 Future Engineers — RoboTronics
 
-<!--
-**WRO2026-FutureEngineers-RoboTronics/WRO2026-FutureEngineers-RoboTronics** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+Team RoboTronics from Bilbao, Spain.
+Competing in WRO 2026 Future Engineers category.
 
-Here are some ideas to get you started:
+## Team Members
+- Sandra García Arias
+- Oscar García Arias
+- Asier García Arias
+- Coach: Edu
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+## Robot
+Built with LEGO Spike Prime.
+Work in progress.
