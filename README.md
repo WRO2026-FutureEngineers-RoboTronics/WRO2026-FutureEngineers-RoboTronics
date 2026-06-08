@@ -196,31 +196,6 @@ walls are placed each round.
 
 ---
 
-## Competition Strategy
-
-Given our limited time in this first Future 
-Engineers season, we decided to focus on:
-
-**Priority 1 — Open Challenge**
-Complete 3 laps reliably with consistent turning 
-and wall centering. Target: full score of 30 points.
-
-**Priority 2 — Documentation**
-Complete and detailed GitHub repository covering 
-all five evaluation criteria. Target: 30 points.
-
-**Priority 3 — Obstacle Challenge (if time allows)**
-Add a camera (OpenMV) to detect red and green 
-pillars. The camera would replace the front 
-distance sensor in Port D, keeping the rest 
-of the system unchanged.
-
-This strategy allows us to guarantee a solid 
-base score while leaving room to improve if 
-development time allows.
-
----
-
 ## Constraints and Tradeoffs
 
 | Constraint | Decision | Tradeoff |
@@ -270,6 +245,160 @@ Note the values and update NARANJA and AZUL
 constants in main.py accordingly.
 
 Our values: NARANJA = 7, AZUL = 4
+
+---
+
+## Current Version — v1.0 Open Challenge
+
+The current version of the robot uses only the 
+LEGO Spike Prime kit with no additional hardware.
+
+### What it does
+- Detects driving direction automatically using 
+  the color sensor on the first colored line
+- Completes 3 laps autonomously
+- Counts corners using color detection
+- Centers between walls using two side distance sensors
+- Uses front distance sensor as backup corner detection
+- Stops in the finish section after 3 laps
+
+### Hardware — v1.0
+Spike Hub
+├── Port A → Steering motor
+├── Port B → Traction motor
+├── Port C → Color sensor (floor, facing down)
+├── Port D → Distance sensor (front)
+├── Port E → Distance sensor (left)
+└── Port F → Distance sensor (right)
+
+### Limitations of v1.0
+- No camera → cannot detect red and green pillars
+- Cannot attempt Obstacle Challenge reliably
+- Color sensor range is too short (~10cm) for 
+  pillar detection while moving at speed
+
+---
+
+## Future Version — v2.0 Obstacle Challenge
+
+We plan to extend the robot with a camera system 
+to attempt the Obstacle Challenge in future competitions.
+
+### The problem we need to solve
+The Obstacle Challenge requires the robot to detect 
+red and green pillars placed randomly on the track 
+and pass them on the correct side:
+- Red pillar → pass on the RIGHT
+- Green pillar → pass on the LEFT
+
+This requires detecting the pillar color from a 
+distance before reaching it, so the robot has 
+time to adjust its trajectory.
+
+### Why the color sensor alone is not enough
+The LEGO Spike color sensor only detects colors 
+at very short range (~10cm). By the time the robot 
+detects a pillar, it is already too close to 
+adjust its path safely.
+
+### Our planned solution — HuskyLens camera
+We plan to add a HuskyLens AI camera to the robot.
+
+HuskyLens is a smart camera with a built-in AI 
+processor that can detect and classify colors 
+from distances of 50-100cm. It communicates 
+via UART and is programmable, making it suitable 
+for integration with the Spike hub.
+
+### Hardware — v2.0 (planned)
+Spike Hub
+├── Port A → Steering motor
+├── Port B → Traction motor
+├── Port C → Color sensor (floor, facing down)
+├── Port D → HuskyLens camera (replaces front sensor)
+├── Port E → Distance sensor (left)
+└── Port F → Distance sensor (right)
+
+The front distance sensor (Port D) will be replaced 
+by the HuskyLens camera. The rest of the system 
+remains unchanged. This allows us to switch between 
+Open Challenge and Obstacle Challenge configurations 
+by swapping a single component.
+
+### How v2.0 will work
+
+**Pillar detection logic:**
+HuskyLens detects RED   → steer right (pass on right side)
+HuskyLens detects GREEN → steer left (pass on left side)
+HuskyLens detects NONE  → continue normal wall centering
+
+**Integration with existing code:**
+The Spike will read UART data from HuskyLens every 
+50ms alongside the existing sensor readings. Pillar 
+avoidance will be added as Priority 1 in the main 
+loop, above the existing corner detection logic.
+
+### Connection challenge
+The main technical challenge for v2.0 is connecting 
+the HuskyLens to the Spike hub. The Spike uses a 
+proprietary JST SH 1.0mm 6-pin connector that requires 
+a custom adapter cable. We are investigating the best 
+solution for this connection.
+
+### Why HuskyLens over other cameras
+
+| Camera | Price | Difficulty | Spike Compatible |
+|--------|-------|------------|-----------------|
+| HuskyLens | ~35€ | Low | Yes (UART) |
+| OpenMV H7 | ~60€ | Medium | Yes (UART) |
+| Raspberry Pi Cam | ~25€ | High | Needs RPi |
+| Spike Color Sensor | 0€ | Low | Yes (native) |
+
+We chose HuskyLens because it has the best balance 
+of price, ease of use and compatibility with our 
+existing Spike setup.
+
+---
+
+## Development Timeline
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| v1.0 Mechanics | ✅ Done | Ackermann chassis with Spike |
+| v1.0 Open Challenge | ✅ Done | 3 laps with color + distance |
+| v1.0 Testing | 🔄 In progress | Tuning on real track |
+| GitHub Documentation | 🔄 In progress | All sections being completed |
+| v2.0 Camera research | ✅ Done | HuskyLens selected |
+| v2.0 Cable solution | 🔄 In progress | JST SH adapter research |
+| v2.0 Obstacle Challenge | 📅 Planned | After Open Challenge stable |
+
+---
+
+## Lessons Learned
+
+### What we underestimated
+- The mechanical complexity of Ackermann steering 
+  with LEGO pieces
+- The proprietary connector system of Spike ports 
+  makes adding external sensors more difficult 
+  than expected
+- Tuning sensor thresholds requires many test runs 
+  on the real track
+
+### What worked well
+- Using motor.run() instead of run_to_absolute_position() 
+  dramatically improved speed and smoothness
+- The dual color and distance system for corner 
+  detection provides redundancy
+- Starting with Open Challenge only was the right 
+  decision given our available time
+
+### What we would do differently
+- Start hardware research earlier to solve the 
+  camera connection problem with more time
+- Buy a JST SH adapter cable at the beginning 
+  of the project
+- Build a practice track at home from the start
 
 ---
 
