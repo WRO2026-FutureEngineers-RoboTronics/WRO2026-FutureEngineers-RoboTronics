@@ -1,7 +1,7 @@
 # WRO 2026 Future Engineers - Team RoboTronics
 # Open Challenge - Main Program
 # Robot: LEGO Spike Prime
-# Version: 2.0
+# Version: 3.0
 
 from hub import light_matrix, port, button
 import motor
