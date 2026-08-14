@@ -1,33 +1,23 @@
 # WRO 2026 Future Engineers - Team RoboTronics
 # Open Challenge - Main Program
 # Robot: LEGO Spike Prime
+# Firmware: LEGO MINDSTORMS Robot Inventor
 # Version: 3.0
 
-from hub import light_matrix, port, button
-import motor
-import color_sensor
-import distance_sensor
-import runloop
+import sys
+sys.path.append('/projects')
+
+from hub import port, button, display
+import time
 
 # =====================
 # CONFIGURACION
 # =====================
 
-VELOCIDAD_TRACCION = 800
-VELOCIDAD_DIRECCION = 400
-GIRO_SUAVE = 200
-
-DISTANCIA_GIRO = 25
-MARGEN_CENTRO = 5
-
-# Valores sensor de color
-AZUL = 3
-
-# Umbrales RGBI para naranja
-# R alto, G bajo, B bajo
-NARANJA_R_MIN = 400
-NARANJA_G_MAX = 200
-NARANJA_B_MAX = 200
+VELOCIDAD_TRACCION = 80
+VELOCIDAD_DIRECCION = 50
+GIRO_SUAVE = 30
+MARGEN_CENTRO = 50
 
 # =====================
 # VARIABLES
@@ -38,127 +28,75 @@ mi_giro = None
 ultimo_color = None
 
 # =====================
-# FUNCIONES
-# =====================
-
-async def girar_derecha():
-    motor.run(port.C, VELOCIDAD_DIRECCION)
-
-async def girar_izquierda():
-    motor.run(port.C, -VELOCIDAD_DIRECCION)
-
-async def recto():
-    motor.stop(port.C)
-
-async def avanzar():
-    motor.run(port.B, VELOCIDAD_TRACCION)
-
-async def parar():
-    motor.stop(port.B)
-    motor.stop(port.C)
-
-def detectar_naranja():
-    rgbi = color_sensor.rgbi(port.A)
-    r = rgbi[0]
-    g = rgbi[1]
-    b = rgbi[2]
-    return r > NARANJA_R_MIN and g < NARANJA_G_MAX and b < NARANJA_B_MAX
-
-def detectar_color():
-    # Detecta azul con modo color normal
-    # Detecta naranja con modo RGBI
-    color = color_sensor.color(port.A)
-    if color == AZUL:
-        return 'AZUL'
-    if detectar_naranja():
-        return 'NARANJA'
-    return None
-
-# =====================
 # PROGRAMA PRINCIPAL
 # =====================
 
-async def main():
-    global esquinas, mi_giro, ultimo_color
+# Esperar boton izquierdo
+display.show(display.Image.ARROW_W)
+while not button.is_pressed('left'):
+    time.sleep_ms(100)
 
-    # Esperar boton de inicio
-    await light_matrix.write("?")
-    while not button.pressed(button.LEFT):
-        await runloop.sleep_ms(100)
+display.show(display.Image.GO_RIGHT)
+time.sleep_ms(500)
 
-    await light_matrix.write("GO")
-    await runloop.sleep_ms(500)
+# Arrancar traccion
+port.F.motor.run_at_speed(VELOCIDAD_TRACCION)
 
-    await avanzar()
+# =====================
+# BUCLE PRINCIPAL
+# =====================
 
-    # =====================
-    # BUCLE PRINCIPAL
-    # =====================
-    while esquinas < 12:
+while esquinas < 12:
 
-        color_visto = detectar_color()
-        dist_frontal = distance_sensor.distance(port.D)
-        dist_izq = distance_sensor.distance(port.E)
-        dist_der = distance_sensor.distance(port.F)
+    # Leer sensores
+    color_visto = port.A.device.get()
+    dist_izq = port.D.device.get()
+    dist_der = port.E.device.get()
 
-        print("C:" + str(color_visto) + " F:" + str(dist_frontal) + " I:" + str(dist_izq) + " D:" + str(dist_der) + " E:" + str(esquinas))
+    print("C:" + str(color_visto) + " I:" + str(dist_izq) + " D:" + str(dist_der) + " E:" + str(esquinas))
 
-        # =====================
-        # PRIORIDAD 1 - Color = esquina
-        # =====================
-        if color_visto != ultimo_color:
-            ultimo_color = color_visto
+    # PRIORIDAD 1 - Color = esquina
+    if color_visto != ultimo_color:
+        ultimo_color = color_visto
 
-            if color_visto == 'NARANJA' or color_visto == 'AZUL':
+        if color_visto and (color_visto[0] in [3, 7]):
+            color_actual = color_visto[0]
 
-                if mi_giro is None:
-                    if color_visto == 'NARANJA':
-                        mi_giro = 'DERECHA'
-                        await light_matrix.write("H")
-                    else:
-                        mi_giro = 'IZQUIERDA'
-                        await light_matrix.write("A")
-
-                if mi_giro == 'DERECHA':
-                    await girar_derecha()
-                else:
-                    await girar_izquierda()
-
-                esquinas += 1
-                await light_matrix.write(str(esquinas))
-
-        # =====================
-        # PRIORIDAD 2 - Pared frontal
-        # =====================
-        elif dist_frontal and dist_frontal < DISTANCIA_GIRO:
             if mi_giro is None:
-                await recto()
-            elif mi_giro == 'DERECHA':
-                await girar_derecha()
-            else:
-                await girar_izquierda()
-
-        # =====================
-        # PRIORIDAD 3 - Centrado
-        # =====================
-        else:
-            if dist_izq and dist_der:
-                diferencia = dist_izq - dist_der
-                if diferencia > MARGEN_CENTRO:
-                    motor.run(port.C, GIRO_SUAVE)
-                elif diferencia < -MARGEN_CENTRO:
-                    motor.run(port.C, -GIRO_SUAVE)
+                if color_actual == 7:
+                    mi_giro = 'DERECHA'
+                    display.show(display.Image.ARROW_E)
                 else:
-                    await recto()
+                    mi_giro = 'IZQUIERDA'
+                    display.show(display.Image.ARROW_W)
+
+            if mi_giro == 'DERECHA':
+                port.B.motor.run_at_speed(VELOCIDAD_DIRECCION)
             else:
-                await recto()
+                port.B.motor.run_at_speed(-VELOCIDAD_DIRECCION)
 
-        await runloop.sleep_ms(50)
+            esquinas += 1
+            display.show(str(esquinas))
 
-    # =====================
-    # FIN
-    # =====================
-    await parar()
-    await light_matrix.write("OK")
+    # PRIORIDAD 2 - Centrado entre paredes
+    else:
+        if dist_izq and dist_der:
+            diferencia = dist_izq[0] - dist_der[0]
+            if diferencia > MARGEN_CENTRO:
+                port.B.motor.run_at_speed(GIRO_SUAVE)
+            elif diferencia < -MARGEN_CENTRO:
+                port.B.motor.run_at_speed(-GIRO_SUAVE)
+            else:
+                port.B.motor.run_at_speed(0)
+        else:
+            port.B.motor.run_at_speed(0)
 
-runloop.run(main())
+    time.sleep_ms(50)
+
+# =====================
+# FIN
+# =====================
+
+port.F.motor.run_at_speed(0)
+port.B.motor.run_at_speed(0)
+display.show(display.Image.YES)
