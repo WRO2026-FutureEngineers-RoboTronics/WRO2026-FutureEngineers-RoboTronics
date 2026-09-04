@@ -114,4 +114,4 @@ Install after every hub firmware update:
 
 ## Connection Photo
 
-[Photo to be added]
+![Connection](https://drive.google.com/uc?export=view&id=16hHux8NCgSVoiMJ4zjoonzMYlw9nv1yy)
