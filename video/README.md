@@ -3,7 +3,7 @@
 ## Open Challenge
 
 Link: [Ver vídeo](https://drive.google.com/file/d/11W35wcra7jwLRkpNSX1HWaoFJbyygJHc/view?usp=sharing)
-Link: [Ver vídeo ronda completa] (https://drive.google.com/file/d/15G5jBhhnpxqICxf_McOHF0fIDBWsvKSB/view?usp=sharing)
+Link: [Ver vídeo ronda completa](https://drive.google.com/file/d/15G5jBhhnpxqICxf_McOHF0fIDBWsvKSB/view?usp=sharing)
 
 The video shows the robot completing 3 laps 
 autonomously on the WRO 2026 track, detecting 
